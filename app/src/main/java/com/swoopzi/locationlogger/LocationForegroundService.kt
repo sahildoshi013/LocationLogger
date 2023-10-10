@@ -76,7 +76,7 @@ class LocationForegroundService : Service() {
             locationManager.requestLocationUpdates(
                 /* provider = */ provider,
                 /* minTimeMs = */ LOCATION_INTERVAL,
-                /* minDistanceM = */ 0f,
+                /* minDistanceM = */ 10f,
                 /* listener = */ locationListener
             )
         }

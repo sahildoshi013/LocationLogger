@@ -31,7 +31,7 @@ class FusedLocationForegroundService : Service() {
     private var locationRequest = LocationRequest.Builder(
         Priority.PRIORITY_HIGH_ACCURACY,
         LOCATION_INTERVAL
-    ).setMinUpdateDistanceMeters(0F).build()
+    ).setMinUpdateDistanceMeters(10F).build()
     private val locationCallback = object : LocationCallback() {
 
         override fun onLocationAvailability(p0: LocationAvailability) {
