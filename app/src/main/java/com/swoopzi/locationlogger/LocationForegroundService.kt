@@ -5,50 +5,31 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
-import android.os.Looper
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationAvailability
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
 
 
 class LocationForegroundService : Service() {
-    private var fusedLocationClient: FusedLocationProviderClient? = null
-    private var locationRequest = LocationRequest.Builder(
-        Priority.PRIORITY_HIGH_ACCURACY,
-        LOCATION_INTERVAL
-    ).setMinUpdateDistanceMeters(10F).build()
-    private val locationCallback = object : LocationCallback() {
+    private lateinit var locationManager: LocationManager
 
-        override fun onLocationAvailability(p0: LocationAvailability) {
-            Log.d(TAG, "onLocationAvailability() called with: p0 = $p0")
-            super.onLocationAvailability(p0)
-        }
-
-        override fun onLocationResult(locationResult: LocationResult) {
-            super.onLocationResult(locationResult)
-            locationResult.lastLocation?.let {
-                saveLocationToFile(it)
-            }
-        }
+    private val locationListener: LocationListener = LocationListener {
+        saveLocationToFile(it)
     }
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
         startForeground(1, createNotification())
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -65,10 +46,24 @@ class LocationForegroundService : Service() {
         ) {
             return START_NOT_STICKY
         }
-        fusedLocationClient?.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper()
+
+        locationManager.requestLocationUpdates(
+            /* provider = */ LocationManager.GPS_PROVIDER,
+            /* minTimeMs = */ LOCATION_INTERVAL,
+            /* minDistanceM = */ 10f,
+            /* listener = */ locationListener
+        )
+        locationManager.requestLocationUpdates(
+            /* provider = */ LocationManager.NETWORK_PROVIDER,
+            /* minTimeMs = */ LOCATION_INTERVAL,
+            /* minDistanceM = */ 10f,
+            /* listener = */ locationListener
+        )
+        locationManager.requestLocationUpdates(
+            /* provider = */ LocationManager.PASSIVE_PROVIDER,
+            /* minTimeMs = */ LOCATION_INTERVAL,
+            /* minDistanceM = */ 10f,
+            /* listener = */ locationListener
         )
 
         // Start the service in the foreground
@@ -86,7 +81,7 @@ class LocationForegroundService : Service() {
         Log.d(TAG, "onDestroy() called")
         super.onDestroy()
         // Stop location updates when the service is destroyed.
-        fusedLocationClient?.removeLocationUpdates(locationCallback)
+        locationManager.removeUpdates(locationListener)
     }
 
     override fun onBind(intent: Intent): IBinder? {

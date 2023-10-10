@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun stopLocationService() {
+        Toast.makeText(this, "Stop Tracking", Toast.LENGTH_SHORT).show()
         stopService(
             Intent(
                 this,
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startLocationService() {
+        Toast.makeText(this, "Started tracking", Toast.LENGTH_SHORT).show()
         if (ActivityCompat.checkSelfPermission(
                 this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION
