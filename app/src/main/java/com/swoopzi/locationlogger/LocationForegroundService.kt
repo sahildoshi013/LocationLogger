@@ -12,6 +12,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
+import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -22,6 +23,14 @@ class LocationForegroundService : Service() {
     private lateinit var locationManager: LocationManager
 
     private val locationListener = object : LocationListener {
+
+        override fun onStatusChanged(
+            provider: String?,
+            status: Int,
+            extras: Bundle?
+        ) {
+            Log.d(TAG, "onStatusChanged() called with: provider = $provider, status = $status, extras = $extras")
+        }
 
         override fun onProviderDisabled(provider: String) {
             Log.d(TAG, "onProviderDisabled() called with: provider = $provider")
