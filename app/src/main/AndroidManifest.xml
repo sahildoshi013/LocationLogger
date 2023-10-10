@@ -33,6 +33,9 @@
         <service
             android:name=".LocationForegroundService"
             android:foregroundServiceType="location" />
+        <service
+            android:name=".FusedLocationForegroundService"
+            android:foregroundServiceType="location" />
         <receiver
             android:name=".BootReceiver"
             android:enabled="true"
