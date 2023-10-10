@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity() {
                 LocationForegroundService::class.java
             )
         )
-
     }
 
     private fun startLocationService() {

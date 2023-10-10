@@ -20,7 +20,7 @@
         android:id="@+id/startFusedTrackingButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start Tracking"
+        android:text="Start Fused Tracking"
         app:layout_constraintBottom_toTopOf="@id/stopTrackingButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/startTrackingButton"
