@@ -21,8 +21,19 @@ import androidx.core.app.NotificationCompat
 class LocationForegroundService : Service() {
     private lateinit var locationManager: LocationManager
 
-    private val locationListener: LocationListener = LocationListener {
-        saveLocationToFile(it)
+    private val locationListener = object : LocationListener {
+
+        override fun onProviderDisabled(provider: String) {
+            Log.d(TAG, "onProviderDisabled() called with: provider = $provider")
+        }
+
+        override fun onProviderEnabled(provider: String) {
+            Log.d(TAG, "onProviderEnabled() called with: provider = $provider")
+        }
+
+        override fun onLocationChanged(location: Location) {
+            saveLocationToFile(location)
+        }
     }
 
     override fun onCreate() {
@@ -32,7 +43,11 @@ class LocationForegroundService : Service() {
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
         startForeground(1, createNotification())
 
         // Request location updates
@@ -47,24 +62,15 @@ class LocationForegroundService : Service() {
             return START_NOT_STICKY
         }
 
-        locationManager.requestLocationUpdates(
-            /* provider = */ LocationManager.GPS_PROVIDER,
-            /* minTimeMs = */ LOCATION_INTERVAL,
-            /* minDistanceM = */ 10f,
-            /* listener = */ locationListener
-        )
-        locationManager.requestLocationUpdates(
-            /* provider = */ LocationManager.NETWORK_PROVIDER,
-            /* minTimeMs = */ LOCATION_INTERVAL,
-            /* minDistanceM = */ 10f,
-            /* listener = */ locationListener
-        )
-        locationManager.requestLocationUpdates(
-            /* provider = */ LocationManager.PASSIVE_PROVIDER,
-            /* minTimeMs = */ LOCATION_INTERVAL,
-            /* minDistanceM = */ 10f,
-            /* listener = */ locationListener
-        )
+        locationManager.allProviders.forEach { provider ->
+            Log.d(TAG, "Register Provider: $provider")
+            locationManager.requestLocationUpdates(
+                /* provider = */ provider,
+                /* minTimeMs = */ LOCATION_INTERVAL,
+                /* minDistanceM = */ 0f,
+                /* listener = */ locationListener
+            )
+        }
 
         // Start the service in the foreground
         return START_STICKY
