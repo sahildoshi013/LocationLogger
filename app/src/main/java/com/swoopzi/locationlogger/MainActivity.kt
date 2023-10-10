@@ -3,7 +3,6 @@ package com.swoopzi.locationlogger
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -27,13 +26,22 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    private var isFusedLocationServiceRunning = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         findViewById<Button>(R.id.startTrackingButton).setOnClickListener {
+            isFusedLocationServiceRunning = false
             startLocationService()
         }
+
+        findViewById<Button>(R.id.startFusedTrackingButton).setOnClickListener {
+            isFusedLocationServiceRunning = true
+            startLocationService()
+        }
+
         findViewById<Button>(R.id.stopTrackingButton).setOnClickListener {
             stopLocationService()
         }
@@ -44,6 +52,12 @@ class MainActivity : AppCompatActivity() {
         stopService(
             Intent(
                 this,
+                FusedLocationForegroundService::class.java
+            )
+        )
+        stopService(
+            Intent(
+                this,
                 LocationForegroundService::class.java
             )
         )
@@ -51,6 +65,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startLocationService() {
+        stopLocationService()
         Toast.makeText(this, "Started tracking", Toast.LENGTH_SHORT).show()
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -65,9 +80,13 @@ class MainActivity : AppCompatActivity() {
                 android.Manifest.permission.ACCESS_FINE_LOCATION
             )
         } else {
+
             val serviceIntent = Intent(
                 this,
-                LocationForegroundService::class.java
+                if (isFusedLocationServiceRunning)
+                    FusedLocationForegroundService::class.java
+                else
+                    LocationForegroundService::class.java
             )
             ContextCompat.startForegroundService(
                 this,
